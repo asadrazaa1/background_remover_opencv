@@ -15,6 +15,7 @@ COPY requirements.txt /usr/src/app
 RUN apt-get update
 RUN apt-get install -y libgl1-mesa-dev
 RUN pip install --upgrade pip
+RUN pip install cmake
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
