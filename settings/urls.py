@@ -27,8 +27,8 @@ admin.site.index_title = "Welcome to BackGroundRemover Admin Portal"
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # path('admin/', admin.site.urls),
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
-    path('remove_background/', RemoveBackgroundView.as_view()),
+    path('', RemoveBackgroundView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
