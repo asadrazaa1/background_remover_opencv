@@ -2,6 +2,8 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import face_recognition as fr
+from uuid import uuid4
+from PIL import Image
 
 
 def remove_background(img_path):
@@ -21,7 +23,7 @@ def remove_background(img_path):
 
     # Set extra sides and upper sides
     x_adder = int(w / 5)
-    y_adder = int(h / 10)
+    y_adder = int(h / 5)
 
     # Find face locations in the image
     face_locations = fr.face_locations(image)
@@ -65,14 +67,38 @@ def remove_background(img_path):
 
         # Combine output image with background
         output_image = np.where(condition, cropped_img, bg_image)
+
+        output_image = Image.fromarray(output_image)
+        output_image = output_image.convert("RGBA")
+
+        datas = output_image.getdata()
+
+        newData = []
+
+        for item in datas:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+
+        output_image.putdata(newData)
+
+        output_image = output_image.convert("RGBA")
+        data = np.array(output_image)
+        red, green, blue, alpha = data.T
+        data = np.array([blue, green, red, alpha])
+        data = data.transpose()
+        output_image = Image.fromarray(data)
+
         output_images.append(output_image)
 
     return output_images
 
+
 # images = remove_background('10029.jpg')
 #
 # if images != []:
-#     for i in range(len(images)):
-#         cv2.imwrite(str(i)+'.jpg',images[i])
+#     for i in images:
+#         i.save('processed_images/' + str(uuid4()) + '.png', 'PNG')
 # else:
-#   print('Face not found')
+#     print('Face not found')
