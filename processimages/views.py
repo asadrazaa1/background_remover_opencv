@@ -39,20 +39,20 @@ class RemoveBackgroundView(generics.GenericAPIView):
 
                 print(filename + "saved")
 
-                processed_objects = []
-                for each_filename in processed_images_filenames:
-                    file = File(open(each_filename, 'rb'))
-                    object = ProcessedImage.objects.create(file=file)
-                    processed_objects.append(object.id)
-                    os.remove(each_filename)
+            processed_objects = []
+            for each_filename in processed_images_filenames:
+                file = File(open(each_filename, 'rb'))
+                object = ProcessedImage.objects.create(file=file)
+                processed_objects.append(object.id)
+                os.remove(each_filename)
 
-                queryset = ProcessedImage.objects.filter(id__in=processed_objects)
-                file_urls = []
-                for each in queryset:
-                    file_urls.append(
-                        "http://backgroundremover-env.eba-rtjya83c.eu-west-2.elasticbeanstalk.com" + each.file.url)
+            queryset = ProcessedImage.objects.filter(id__in=processed_objects)
+            file_urls = []
+            for each in queryset:
+                file_urls.append(
+                    "http://backgroundremover-env.eba-rtjya83c.eu-west-2.elasticbeanstalk.com" + each.file.url)
 
-                return Response({'detail': file_urls}, status=status.HTTP_200_OK)
+            return Response({'detail': file_urls}, status=status.HTTP_200_OK)
         else:
             # return {"file": "Face not found"}
             return Response({'error': "Faces not found!"}, status=status.HTTP_400_BAD_REQUEST)
