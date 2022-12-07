@@ -1,9 +1,17 @@
+import os
+from time import sleep
+
 import cv2
 import mediapipe as mp
 import numpy as np
 import face_recognition as fr
 from uuid import uuid4
 from PIL import Image
+from django.core.files import File
+from rest_framework import status
+from rest_framework.response import Response
+
+from processimages.models import ProcessedImage
 
 
 def remove_background(img_path):
@@ -95,10 +103,32 @@ def remove_background(img_path):
     return output_images
 
 
-# images = remove_background('10029.jpg')
-#
-# if images != []:
-#     for i in images:
-#         i.save('processed_images/' + str(uuid4()) + '.png', 'PNG')
-# else:
-#     print('Face not found')
+def write_images(images):
+    processed_images_filenames = []
+    for i in images:
+        # cv2.imwrite(str(BASE_DIR) + 'processed_images/' + str(uuid4()) + '.jpg', images[i])
+        # filename = "static/processed_images/" + str(uuid4()) + '.jpg'
+        filename = str(uuid4()) + '.png'
+        img = np.array(i)
+        processed_images_filenames.append(filename)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+        print(cv2.imwrite('processed_images/' + filename, img))
+    sleep(20)
+    return processed_images_filenames
+
+
+def return_response(processed_images_filenames):
+    processed_objects = []
+    for each_filename in processed_images_filenames:
+        file = File(open(each_filename, 'rb'))
+        object = ProcessedImage.objects.create(file=file)
+        processed_objects.append(object.id)
+        os.remove(each_filename)
+
+    queryset = ProcessedImage.objects.filter(id__in=processed_objects)
+    file_urls = []
+    for each in queryset:
+        # file_urls.append("http://backgroundremover-env.eba-rtjya83c.eu-west-2.elasticbeanstalk.com" + each.file.url)
+        file_urls.append("http://127.0.0.1:8000" + each.file.url)
+
+    return Response({'detail': file_urls}, status=status.HTTP_200_OK)
