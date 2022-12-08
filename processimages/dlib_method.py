@@ -113,7 +113,6 @@ def write_images(images):
         processed_images_filenames.append(filename)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
         print(cv2.imwrite('processed_images/' + filename, img))
-    sleep(20)
     return processed_images_filenames
 
 

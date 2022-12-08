@@ -29,10 +29,29 @@ class RemoveBackgroundView(generics.GenericAPIView):
         filepath = tup[1]  # get the filepath
 
         images = remove_background(filepath)
+        processed_images_filenames = []
+
         if images != []:
-            processed_images_filenames = write_images(images)
-            print(processed_images_filenames)
-            return return_response(processed_images_filenames)
+            for i in images:
+                filename = str(uuid4()) + '.png'
+                img = np.array(i)
+                processed_images_filenames.append(filename)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+                cv2.imwrite('processed_images/' + filename, img)
+
+            processed_objects = []
+            for each_filename in processed_images_filenames:
+                file = File(open('processed_images/' + each_filename, 'rb'))
+                object = ProcessedImage.objects.create(file=file)
+                processed_objects.append(object.id)
+
+            queryset = ProcessedImage.objects.filter(id__in=processed_objects)
+            file_urls = []
+            for each in queryset:
+                file_urls.append("http://backgroundremover-env.eba-rtjya83c.eu-west-2.elasticbeanstalk.com" + each.file.url)
+                # file_urls.append("http://127.0.0.1:8000" + each.file.url)
+
+            return Response({'detail': file_urls}, status=status.HTTP_200_OK)
         else:
             # return {"file": "Face not found"}
             return Response({'error': "Faces not found!"}, status=status.HTTP_400_BAD_REQUEST)
