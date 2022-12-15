@@ -48,7 +48,7 @@ class RemoveBackgroundView(generics.GenericAPIView):
             queryset = ProcessedImage.objects.filter(id__in=processed_objects)
             file_urls = []
             for each in queryset:
-                file_urls.append("http://backgroundremover-env.eba-rtjya83c.eu-west-2.elasticbeanstalk.com" + each.file.url)
+                file_urls.append("http://clashingheadsbgremover-env.eba-px5uwbvm.eu-west-2.elasticbeanstalk.com" + each.file.url)
                 # file_urls.append("http://127.0.0.1:8000" + each.file.url)
 
             return Response({'detail': file_urls}, status=status.HTTP_200_OK)
